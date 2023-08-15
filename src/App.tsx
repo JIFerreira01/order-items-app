@@ -13,7 +13,9 @@ import { Loading } from "./components/Loading";
 
 const App = () => {
   const productsActivated: Array<IProduct> = [];
-  products.data.product.map((product) => product.active ? productsActivated.push(product) : false );
+  products.data.product.map((product: IProduct | object | null) => product?.active ? productsActivated.push(product) : false );
+  productsActivated.splice(20, productsActivated.length - 20);
+  
   const context = useGlobalReorder();
   
   const [listOfChildren, setListOfChildren] = useState(productsActivated);
@@ -24,12 +26,13 @@ const App = () => {
   }, [])
 
 
-  const simulateTimeOfRequestResponse = (functionForRequest, paramForRequest) => {
+  const simulateTimeOfRequestResponse = (functionForRequest: React.Dispatch<React.SetStateAction<IProduct | null | undefined>>, paramForRequest: IProduct | null) => {
     handleEventLoading(true)
     setTimeout(() => {
       functionForRequest(paramForRequest)
       functionForRequest(paramForRequest)
       handleEventLoading(false)
+      context.setActions({...context.actions, combine: true})
     }, 1000);
   }
 
@@ -52,7 +55,6 @@ const App = () => {
     const parentOfProductClicked: Array<object> = [];
 
     if(productParams?.identifier !== itemSelected?.identifier){
-      context.setActions({...context.actions, combine: true})
       handleEventLoading(true);
       
         productsActivated.map((parent: IProduct): void => {

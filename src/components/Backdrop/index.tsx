@@ -1,27 +1,21 @@
 /* eslint-disable no-debugger */
-import { FC, ReactNode, useEffect } from "react";
+import { FC } from "react";
 
 import { Container, Text, Header, Button } from "./styles";
 import { useGlobalReorder } from "../../context";
+import { ContextProps } from "../../interfaces";
 
-interface BackdropProps {
-  children: ReactNode;
-}
-
-export const Backdrop: FC<BackdropProps> = ({ children }) => {
+export const Backdrop: FC<ContextProps> = ({ children }) => {
   const stateReorder = useGlobalReorder();
   const handleDispatch = () => {
     stateReorder.setActions({...stateReorder.actions, combine: false})
   }
 
-  useEffect(() => {
-  }, [stateReorder.actions.transition])
-
   return (
     <Container>
         <Header>
           <Text>Combinar</Text>
-          <Button id="button__combine--clear" onClick={() => handleDispatch()} aria-hidden={stateReorder.actions.combine ? true : false}>Limpar</Button>
+          <Button id="button__combine--clear" onClick={() => handleDispatch()} aria-hidden={!stateReorder.actions.combine ? true : false}>Limpar</Button>
         </Header>
       {children}
     </Container>

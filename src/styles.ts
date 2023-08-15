@@ -5,7 +5,8 @@ export const Button = styled.button `
     border: 3px solid #EAEAEA;
     border-radius: 8px;
     margin-right: 10px;
-    border: ${props => props["aria-selected"] ? "3px solid #00A2FF" : "none"}
+    border: ${props => props["aria-selected"] ? "3px solid #00A2FF;" : "none;"}
+    margin: ${props => props["aria-selected"] ? "0 13px" : "0"}
 `
 
 export const DivLoading = styled.div`
