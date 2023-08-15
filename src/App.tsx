@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Stage } from "./components/Stage";
 import { Backdrop } from "./components/Backdrop";
 import { List } from "./components/List";
@@ -5,62 +6,87 @@ import products from './data/products.json'
 import { useGlobalReorder } from "./context";
 import { useEffect, useState } from "react";
 
+import { IProduct } from "./interfaces";
 import { Button } from './styles';
+import { Loading } from "./components/Loading";
 
-// "https://lojausereserva.vtexassets.com/arquivos/ids/7956078-1200-auto?v=638248721303730000&width=1200&height=auto&aspect=true"
-// "https://lojausereserva.vtexassets.com/arquivos/ids/7956077-1200-auto?v=638248721291830000&width=1200&height=auto&aspect=true"
-
-interface IProduct {
-  active:boolean,
-  category: object,
-  identifier: string,
-  list_price: number,
-  name: string
-  parent_identifier: string,
-  selling_price: number,
-  status: string,
-  thumbnail: string,
-  url: string
-}
 
 const App = () => {
-  const productsActivated: Array<object> = [];
-  const { clear } = useGlobalReorder();
-  products.data.product.map(product => product.active ? productsActivated.push(product) : false );
-  console.log('dados do array', productsActivated);
+  const productsActivated: Array<IProduct> = [];
+  products.data.product.map((product) => product.active ? productsActivated.push(product) : false );
+  const context = useGlobalReorder();
   
   const [listOfChildren, setListOfChildren] = useState(productsActivated);
-  const [itemSelected, setItemSelected] = useState(productsActivated[0]);
+  const [itemSelected, setItemSelected] = useState<IProduct | null>();
 
   useEffect(() => {
-    if(clear){
-      setListOfChildren(productsActivated);
-    }
-  }, [clear])
+    onPageLoaded();
+  }, [])
+
+
+  const simulateTimeOfRequestResponse = (functionForRequest, paramForRequest) => {
+    handleEventLoading(true)
+    setTimeout(() => {
+      functionForRequest(paramForRequest)
+      functionForRequest(paramForRequest)
+      handleEventLoading(false)
+    }, 1000);
+  }
+
+  const defaultValueComponents = (): void => {
+    setListOfChildren(productsActivated)
+    setItemSelected(null)
+  }
+
+  const onPageLoaded = () => {
+    const eventElement = document.getElementById("button__combine--clear");
+    eventElement?.addEventListener("click", defaultValueComponents);
+  }
+
+  const stageLocaleOfList = (): void => {
+    const wrapperListElement = document.getElementById('list--wrapper');
+    wrapperListElement?.scrollTo(0,0);
+  }
 
   const handleOptionClicked = (productParams: IProduct) => {
-    console.log('option clicked', productParams);
     const parentOfProductClicked: Array<object> = [];
-    productsActivated.map((parent: IProduct) => {
-      if(parent.parent_identifier == productParams.parent_identifier) parentOfProductClicked.push(parent);
-    })
 
-    console.log(parentOfProductClicked);
-    setItemSelected(productParams);
-    setListOfChildren(parentOfProductClicked);
+    if(productParams?.identifier !== itemSelected?.identifier){
+      context.setActions({...context.actions, combine: true})
+      handleEventLoading(true);
+      
+        productsActivated.map((parent: IProduct): void => {
+          if (parent?.parent_identifier == productParams?.parent_identifier) parentOfProductClicked.push(parent);
+        })
+
+        if(parentOfProductClicked.length > 1){
+          const indexOfParentProduct = parentOfProductClicked.findIndex((parent) => parent == productParams);
+          parentOfProductClicked.splice(indexOfParentProduct, 1);
+          parentOfProductClicked.unshift(productParams);
+        }
+        simulateTimeOfRequestResponse(setItemSelected, productParams);
+        simulateTimeOfRequestResponse(setListOfChildren, parentOfProductClicked);
+    }
+    stageLocaleOfList();    
+  }
+  
+  const handleEventLoading = (status: boolean = false) => {
+    context.setActions({...context.actions, transition: status})
   }
 
   return (
     <>
       <Stage
-        imageUrl={itemSelected?.thumbnail}
-        currentPrice={`R$ ${itemSelected?.selling_price}`}
+        imageUrl={itemSelected?.thumbnail || listOfChildren[0]?.thumbnail}
+        currentPrice={`R$ ${itemSelected?.selling_price || listOfChildren[0]?.selling_price}`}
       />
       <Backdrop>
       <List>
+        {context.actions.transition && <Loading data-details="backdrop" />}
         {listOfChildren.length > 0 && listOfChildren?.map((product: object, i: number) => (
-            <Button 
+            <Button
               key={i}
+              aria-selected={itemSelected?.identifier == product?.identifier ? true : false}
               onClick={() => handleOptionClicked(product)}>
               <img
                 style={{

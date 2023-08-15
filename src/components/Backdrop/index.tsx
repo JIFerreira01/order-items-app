@@ -1,6 +1,7 @@
-import { FC, ReactNode } from "react";
+/* eslint-disable no-debugger */
+import { FC, ReactNode, useEffect } from "react";
 
-import { Container, Text, Header } from "./styles";
+import { Container, Text, Header, Button } from "./styles";
 import { useGlobalReorder } from "../../context";
 
 interface BackdropProps {
@@ -8,16 +9,20 @@ interface BackdropProps {
 }
 
 export const Backdrop: FC<BackdropProps> = ({ children }) => {
-  const { clear, setClear } = useGlobalReorder();
+  const stateReorder = useGlobalReorder();
   const handleDispatch = () => {
-    clear ? setClear(false) : setClear(true);
+    stateReorder.setActions({...stateReorder.actions, combine: false})
   }
+
+  useEffect(() => {
+  }, [stateReorder.actions.transition])
+
   return (
     <Container>
-      <Header>
-        <Text>Combinar</Text>
-        <button onClick={() => handleDispatch()}>Limpar</button>
-      </Header>
+        <Header>
+          <Text>Combinar</Text>
+          <Button id="button__combine--clear" onClick={() => handleDispatch()} aria-hidden={stateReorder.actions.combine ? true : false}>Limpar</Button>
+        </Header>
       {children}
     </Container>
   );

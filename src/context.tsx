@@ -1,29 +1,21 @@
-import { useContext, createContext, useState, FC, ReactNode } from "react";
-
-interface ContextProps {
-    children: ReactNode;
-}
-
-interface PropsClear {
-    clear: boolean,
-    setClear: React.Dispatch<React.SetStateAction<boolean>>
-}
+import { useContext, createContext, useState, FC } from "react";
+import { ContextProps, PropsState } from "./interfaces";
 
 const DEFAULT_VALUE = {
-    clear: false,
-    setClear: (data: boolean) => data 
+    actions: {combine: false, clear: false, transition: false},
+    setActions: (): object => new Object(),
+    combineSelected: new Object(),
+    setCombineSelected: (): object => new Object()
 }
 
-
-const ContextReorderGlobal = createContext<PropsClear>(DEFAULT_VALUE)
-
-
+const ContextReorderGlobal = createContext<PropsState>(DEFAULT_VALUE)
 
 export const GlobalContextReorderProvider: FC<ContextProps> = ({ children }) => {
-    const [clear, setClear] = useState(DEFAULT_VALUE.clear);
+    const [actions, setActions] = useState(DEFAULT_VALUE.actions);
+    const [combineSelected, setCombineSelected] = useState(DEFAULT_VALUE.combineSelected)
 
     return (
-        <ContextReorderGlobal.Provider value={{ clear, setClear }}>
+        <ContextReorderGlobal.Provider value={{ actions, setActions, combineSelected, setCombineSelected }}>
             {children}
         </ContextReorderGlobal.Provider>
     )

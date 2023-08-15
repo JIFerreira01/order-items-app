@@ -8,6 +8,6 @@ interface ListProps {
 
 export const List: FC<ListProps> = ({ children }) => (
   <OuterWrapper>
-    <InnerWrapper>{children}</InnerWrapper>
+    <InnerWrapper id="list--wrapper">{children}</InnerWrapper>
   </OuterWrapper>
 );

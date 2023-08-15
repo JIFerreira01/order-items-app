@@ -29,4 +29,16 @@ export const Header = styled.div`
 
 export const Text = styled.div`
   color: #000;
-`;
+  `;
+  
+  export const Button = styled.button`
+  border-radius: 0px 8px;
+  width: 66px;
+  height: 24px;
+  background-color: #00A2FF;
+  border: none;
+  text-transform: uppercase;
+  font-size: 10px;
+  display: ${props => props["aria-hidden"] ? "none" : "block"}
+
+`
